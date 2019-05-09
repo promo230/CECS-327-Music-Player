@@ -673,7 +673,7 @@ public class DFS {
 
     /**MAP REDUCE FUNCTIONS START HERE*/
 
-    public void emit(String key, String value, FileJson file) {
+    public void emit(String key, String value, String file) {
         for (int i = 0; i < file.getPages().size(); i++) {
             file.getPages().get(i).addKeyValue(key, value);
         }
@@ -751,5 +751,20 @@ public class DFS {
         counter.put(file, value);
     }
 
+    public void reduceContext(TreeMap<String, JsonObject> page, Mapper reducer, DFS coordinator, String file) {
+        /*
+         * for each (key, value) in page //Note that values are a set
+         * 		reducer.reduce(key, value, this, file)
+         * coordinator.onPageCompleted(file)
+         */
+        try {
+            for (Map.Entry<String, JsonObject> entry : page.entrySet())
+                reducer.reduce(entry.getKey(), entry.getValue(), this, file);
+
+            coordinator.onPageCompleted(file);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
 
 }
